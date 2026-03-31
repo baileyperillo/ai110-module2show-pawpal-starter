@@ -2,17 +2,7 @@
 
 ## 1. System Design
 
-**a. Initial design**
-
-Three things user should be able to do:
-1. user should enter info on themselves and their pet
-2. user can enter their task, time duration, and priority and see it displayed
-3. user can edit task with the time duration to do task and priority
-
-
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
-
+Original Design:
 There should be a class named Ticket. It should have attributes:
 string owner
 string pet name
@@ -33,6 +23,19 @@ enter task = enter task (task title, taskDescription?, timeDuration, priority)
 edit task = edit info in selected task and save
 task organizer = organizes the task based on priority or based on time entered
 completed = task is erased from list when selected as completed
+
+After modifications, Prompt:
+I am designing a pet care app with the four classes: ownerInfo, Task, List, and another class I don't know, maybe petInfo. 
+ownerInfo is how the owner can enter their information along with their pet and number of pets. The user could also edit their info.
+
+petInfo is the info the user puts for their pet. It should include pet name, type of animal. The usesr should be able to add multiple pets and edit this information.
+
+Task should is the task the owner can make, such as walk the dog. Each task should have time duration it would take to complete task and priority.
+
+List should show the list of tasks. Can add the which pet the task is for if they want. The List should be organized by priority or when they were inputted.
+
+Use Mermaid Live Demo to create a Mermaid.js UML class diagram
+
 
 UML Diagram (created by Claude)
 classDiagram
@@ -141,11 +144,31 @@ OwnerInfo:
         List "1" --> "many" Task : contains
 
 
+**a. Initial design**
+
+Three things user should be able to do:
+1. user should enter info on themselves and their pet
+2. user can enter their task, time duration, and priority and see it displayed
+3. user can edit task with the time duration to do task and priority
+
+
+- Briefly describe your initial UML design.
+- What classes did you include, and what responsibilities did you assign to each?
+
+The UML diagram has 4 classes. OwnerInfo, PetInfo, Task, List. Owner can own many Pets and make many Lists and Tasks. All Pets have one Owner and can have a List assigned to them. A Task is created by the Owner and can be assigned a time duration, priority, and Pet as a list if it is specific to it. A List is made up of Tasks and a list of Tasks can be assigned to a specific Pet.
+OwnerInfo is how the user enters their information along with their pets. they can edit their info. PetInfo is the information the owner enters about their pet. It can be edited. The Task is what the owner wants to complete. It should have the priority, the time duration it would take to complete it, and optionally the pet it may be assigned to. It can be edited. The List should organize the group of tasks, whether it is assigned to specific pets or not, depending on priority or order of input.
 
 **b. Design changes**
 
 - Did your design change during implementation?
 - If yes, describe at least one change and why you made it.
+
+There were some design changes in the implementation. The way the relationships were managed was a probem. For example, if pet information was edited or deleted, the pet information according to the owner info would not be updated on the change. This is very important if the owner is supposed to be able to edit their info while keeping the PetInfo separated.
+
+There was also no sorting method for the list of tasks. So the tasks were not really being sorted by priority in the lists. This is an important feature for the project if we need to add priority.
+
+There was also a validation concern according the the AI, where everything inputted needed to be validated, along with making sure that it is correct. This might become an issue if this was not just used by the owner or you are relating a task with a pet and an owner.
+
 
 ---
 

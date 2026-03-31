@@ -17,17 +17,36 @@ class OwnerInfo:
     
     def add_owner_info(self) -> None:
         """Add owner information to the system."""
-        pass
+        # Validate required fields
+        if not self.name or not self.email or not self.phone:
+            raise ValueError("Name, email, and phone are required")
+        # Basic email validation
+        if "@" not in self.email:
+            raise ValueError("Invalid email format")
+        if self.number_of_pets < 0:
+            raise ValueError("Number of pets cannot be negative")
+        # In a real system, this would save to database
+        print(f"Owner '{self.name}' added successfully")
     
     def edit_owner_info(self) -> None:
         """Edit the owner's information."""
-        pass
+        # Validate required fields
+        if not self.name or not self.email or not self.phone:
+            raise ValueError("Name, email, and phone are required")
+        # Basic email validation
+        if "@" not in self.email:
+            raise ValueError("Invalid email format")
+        if self.number_of_pets < 0:
+            raise ValueError("Number of pets cannot be negative")
+        # In a real system, this would update in database
+        print(f"Owner '{self.name}' updated successfully")
 
 
 @dataclass
 class PetInfo:
     """Stores individual pet information and metadata."""
     pet_id: int
+    owner_id: int
     pet_name: str
     animal_type: str
     breed: Optional[str] = None
@@ -35,17 +54,30 @@ class PetInfo:
     
     def add_pet(self) -> None:
         """Add a new pet to the system."""
-        pass
+        # Validate required fields
+        if not self.pet_name or not self.animal_type:
+            raise ValueError("Pet name and animal type are required")
+        if self.age is not None and self.age < 0:
+            raise ValueError("Age cannot be negative")
+        # In a real system, this would save to database
+        print(f"Pet '{self.pet_name}' added successfully")
     
     def edit_pet(self) -> None:
         """Edit the pet's information."""
-        pass
+        # Validate required fields
+        if not self.pet_name or not self.animal_type:
+            raise ValueError("Pet name and animal type are required")
+        if self.age is not None and self.age < 0:
+            raise ValueError("Age cannot be negative")
+        # In a real system, this would update in database
+        print(f"Pet '{self.pet_name}' updated successfully")
 
 
 @dataclass
 class Task:
     """Stores individual task/activity information."""
     task_id: int
+    owner_id: int
     task_name: str
     duration: int  # in minutes
     priority: int  # 1-5 or similar scale
@@ -54,40 +86,77 @@ class Task:
     
     def create_task(self) -> None:
         """Create a new task."""
-        pass
+        # Validate required fields
+        if not self.task_name:
+            raise ValueError("Task name is required")
+        if self.duration <= 0:
+            raise ValueError("Duration must be positive")
+        if not (1 <= self.priority <= 5):
+            raise ValueError("Priority must be between 1 and 5")
+        # In a real system, this would save to database
+        print(f"Task '{self.task_name}' created successfully")
     
     def edit_task(self) -> None:
         """Edit the task's information."""
-        pass
+        # Validate required fields
+        if not self.task_name:
+            raise ValueError("Task name is required")
+        if self.duration <= 0:
+            raise ValueError("Duration must be positive")
+        if not (1 <= self.priority <= 5):
+            raise ValueError("Priority must be between 1 and 5")
+        # In a real system, this would update in database
+        print(f"Task '{self.task_name}' updated successfully")
     
     def delete_task(self) -> None:
         """Delete the task."""
-        pass
+        # In a real system, this would remove from database
+        print(f"Task '{self.task_name}' deleted successfully")
 
 
 @dataclass
 class TaskList:
     """Organizes and displays tasks, filtered by priority or chronological order."""
     list_id: int
+    owner_id: int
     list_name: str
     sort_by: str  # "priority" or "createdDate"
     tasks: List[Task] = field(default_factory=list)
     
     def add_task(self, task: Task) -> None:
         """Add a task to the list."""
-        pass
+        if task.owner_id != self.owner_id:
+            raise ValueError("Task must belong to the same owner as the list")
+        if task not in self.tasks:
+            self.tasks.append(task)
+            print(f"Task '{task.task_name}' added to list '{self.list_name}'")
+        else:
+            print(f"Task '{task.task_name}' is already in the list")
     
     def remove_task(self, task: Task) -> None:
         """Remove a task from the list."""
-        pass
+        if task in self.tasks:
+            self.tasks.remove(task)
+            print(f"Task '{task.task_name}' removed from list '{self.list_name}'")
+        else:
+            print(f"Task '{task.task_name}' not found in the list")
     
     def get_tasks(self) -> List[Task]:
         """Get all tasks in the list, sorted by priority or date."""
-        pass
+        if self.sort_by == "priority":
+            return sorted(self.tasks, key=lambda t: t.priority)
+        elif self.sort_by == "createdDate":
+            return sorted(self.tasks, key=lambda t: t.created_at)
+        else:
+            # Default to priority if invalid sort_by
+            return sorted(self.tasks, key=lambda t: t.priority)
     
     def update_sort_order(self, sort_by: str) -> None:
         """Update the sort order (priority or createdDate)."""
-        pass
+        if sort_by not in ["priority", "createdDate"]:
+            raise ValueError("Sort order must be 'priority' or 'createdDate'")
+        self.sort_by = sort_by
+        print(f"Sort order updated to '{sort_by}' for list '{self.list_name}'")
 
 
 # -----------------------------------------------------------------------
