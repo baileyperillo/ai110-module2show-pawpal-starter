@@ -4,7 +4,7 @@
 
 from dataclasses import dataclass, field
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timedelta
 
 
 # -----------------------------------------------------------------------
@@ -22,6 +22,7 @@ class Task:
     frequency: str              # how often, e.g. "daily", "weekly"
     time: str = "00:00"         # scheduled time in "HH:MM" format
     priority: str = "medium"    # "low", "medium", or "high"
+    due_date: datetime = field(default_factory=datetime.now)  # when the task is due
     is_complete: bool = False   # whether the task has been completed
 
     def mark_complete(self) -> None:
@@ -146,6 +147,103 @@ class Scheduler:
             all_tasks = [task for task in all_tasks if task in pet.tasks]
         
         return all_tasks
+
+    def complete_task_with_recurrence(self, task: Task, pet: Pet) -> Optional[Task]:
+        """Mark a task complete and create the next occurrence if it's recurring.
+        
+        Uses timedelta to calculate accurate next due dates:
+        - Daily tasks: due_date + 1 day
+        - Weekly tasks: due_date + 7 days
+        
+        Args:
+            task: The task to mark as complete
+            pet: The pet the task belongs to
+            
+        Returns:
+            The next task instance if recurring, None if one-time task
+        """
+        task.mark_complete()
+        
+        # If not recurring, don't create a new task
+        if task.frequency not in ["daily", "weekly"]:
+            return None
+        
+        # Calculate next due date using timedelta
+        if task.frequency == "daily":
+            next_due_date = task.due_date + timedelta(days=1)
+        else:  # weekly
+            next_due_date = task.due_date + timedelta(days=7)
+        
+        # Create the next task instance
+        next_task = Task(
+            task_id=task.task_id + 1000,  # Generate a new unique ID
+            description=task.description,
+            duration=task.duration,
+            frequency=task.frequency,
+            time=task.time,
+            priority=task.priority,
+            due_date=next_due_date,
+            is_complete=False
+        )
+        
+        # Add the new task to the pet
+        pet.add_task(next_task)
+        
+        return next_task
+
+    def detect_scheduling_conflicts(self) -> List[str]:
+        """Detect time conflicts across all tasks and return warning messages.
+        
+        Lightweight strategy: Groups tasks by due_date and time, then flags duplicates.
+        Returns warnings instead of raising exceptions - program continues safely.
+        
+        Returns:
+            List of warning messages for each conflict detected
+        """
+        warnings = []
+        all_tasks = self.owner.get_all_tasks()
+        
+        # Group tasks by (due_date, time) for efficient conflict detection
+        schedule_map = {}
+        for pet in self.owner.pets:
+            for task in pet.tasks:
+                # Create a key from due date and time (ignore the time of day, just date + scheduled time)
+                date_key = task.due_date.date()
+                time_key = task.time
+                schedule_key = (date_key, time_key)
+                
+                if schedule_key not in schedule_map:
+                    schedule_map[schedule_key] = []
+                schedule_map[schedule_key].append((pet.name, task))
+        
+        # Check for conflicts (multiple tasks at same time)
+        for (date, time), tasks_at_slot in schedule_map.items():
+            if len(tasks_at_slot) > 1:
+                pet_names = [pet_name for pet_name, _ in tasks_at_slot]
+                task_descriptions = [task.description for _, task in tasks_at_slot]
+                
+                warning = f"⚠️  SCHEDULING CONFLICT on {date} at {time}: {len(tasks_at_slot)} tasks scheduled\n"
+                warning += f"   Pets: {', '.join(pet_names)}\n"
+                warning += f"   Tasks: {' | '.join(task_descriptions)}"
+                warnings.append(warning)
+        
+        return warnings
+
+    def check_conflicts_and_add_task(self, pet: Pet, task: Task) -> tuple[Task, List[str]]:
+        """Add a task to a pet and return any scheduling conflicts.
+        
+        Safe wrapper that adds task and reports conflicts without crashing.
+        
+        Args:
+            pet: The pet to add the task to
+            task: The task to add
+            
+        Returns:
+            Tuple of (added_task, warning_messages)
+        """
+        pet.add_task(task)
+        conflicts = self.detect_scheduling_conflicts()
+        return task, conflicts
 
 
 # -----------------------------------------------------------------------
