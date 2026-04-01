@@ -105,11 +105,22 @@ class Scheduler:
         """Return all tasks assigned to a specific pet."""
         pass
 
+    def _time_to_minutes(self, time_str: str) -> int:
+        """Helper: Convert "HH:MM" to total minutes for sorting.
+        
+        Args:
+            time_str: Time in "HH:MM" format
+            
+        Returns:
+            Total minutes since midnight
+        """
+        hours, minutes = map(int, time_str.split(':'))
+        return hours * 60 + minutes
+
     def sort_by_time(self) -> List[Task]:
         """Return all tasks sorted by scheduled time in "HH:MM" format (earliest first)."""
         all_tasks = self.owner.get_all_tasks()
-        # Lambda converts "HH:MM" to total minutes for numeric comparison
-        return sorted(all_tasks, key=lambda task: int(task.time.split(':')[0]) * 60 + int(task.time.split(':')[1]))
+        return sorted(all_tasks, key=lambda task: self._time_to_minutes(task.time))
 
     def filter_by_completion_status(self, is_complete: bool) -> List[Task]:
         """Filter tasks by completion status. Pass True for completed, False for pending."""
