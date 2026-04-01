@@ -20,6 +20,8 @@ class Task:
     description: str            # what the task is, e.g. "Walk the dog"
     duration: int               # estimated time to complete, in minutes
     frequency: str              # how often, e.g. "daily", "weekly"
+    time: str = "00:00"         # scheduled time in "HH:MM" format
+    priority: str = "medium"    # "low", "medium", or "high"
     is_complete: bool = False   # whether the task has been completed
 
     def mark_complete(self) -> None:
@@ -101,6 +103,24 @@ class Scheduler:
     def get_tasks_for_pet(self, pet: Pet) -> List[Task]:
         """Return all tasks assigned to a specific pet."""
         pass
+
+    def sort_by_time(self) -> List[Task]:
+        """Return all tasks sorted by scheduled time in "HH:MM" format (earliest first)."""
+        all_tasks = self.owner.get_all_tasks()
+        # Lambda converts "HH:MM" to total minutes for numeric comparison
+        return sorted(all_tasks, key=lambda task: int(task.time.split(':')[0]) * 60 + int(task.time.split(':')[1]))
+
+    def filter_by_completion_status(self, is_complete: bool) -> List[Task]:
+        """Filter tasks by completion status. Pass True for completed, False for pending."""
+        all_tasks = self.owner.get_all_tasks()
+        return [task for task in all_tasks if task.is_complete == is_complete]
+
+    def filter_by_pet_name(self, pet_name: str) -> List[Task]:
+        """Return all tasks assigned to a pet with the specified name."""
+        pet = next((pet for pet in self.owner.pets if pet.name == pet_name), None)
+        if pet is None:
+            return []
+        return pet.tasks
 
 
 # -----------------------------------------------------------------------

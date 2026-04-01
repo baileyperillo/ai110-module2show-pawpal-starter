@@ -1,4 +1,5 @@
 import streamlit as st
+from pawpal_system import Task, Pet, Owner, Scheduler
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
@@ -40,26 +41,66 @@ st.divider()
 
 st.subheader("Quick Demo Inputs (UI only)")
 owner_name = st.text_input("Owner name", value="Jordan")
-pet_name = st.text_input("Pet name", value="Mochi")
-species = st.selectbox("Species", ["dog", "cat", "other"])
+
+# --- Old placeholders (replaced by pawpal_system calls below) ---
+# pet_name = st.text_input("Pet name", value="Mochi")
+# species = st.selectbox("Species", ["dog", "cat", "other"])
+
+# --- Pet input using pawpal_system ---
+pet_name = st.text_input("Pet name", value="Mochi")    # -> Pet.name
+species = st.selectbox("Species", ["dog", "cat", "other"])  # -> Pet.animal_type
+
+if "owner" not in st.session_state:
+    st.session_state.owner = Owner(owner_id=1, name=owner_name, email="")  # Owner() from pawpal_system
+
+if "pet" not in st.session_state:
+    new_pet = Pet(pet_id=1, name=pet_name, animal_type=species)  # Pet() from pawpal_system
+    st.session_state.owner.add_pet(new_pet)   # Owner.add_pet() from pawpal_system
+    st.session_state.pet = new_pet
 
 st.markdown("### Tasks")
 st.caption("Add a few tasks. In your final version, these should feed into your scheduler.")
 
-if "tasks" not in st.session_state:
+if "tasks" not in st.session_state: #how to check if an object 
+    #(like your Owner instance) already exists in the "vault" of 
+    # the session before creating a new one.
     st.session_state.tasks = []
+# --- Old placeholder UI (replaced by pawpal_system calls below) ---
+# col1, col2, col3 = st.columns(3)
+# with col1:
+#     task_title = st.text_input("Task title", value="Morning walk")
+# with col2:
+#     duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+# with col3:
+#     priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+#
+# if st.button("Add task"):
+#     st.session_state.tasks.append(
+#         {"title": task_title, "duration_minutes": int(duration), "priority": priority}
+#     )
 
+# --- Task input using pawpal_system ---
 col1, col2, col3 = st.columns(3)
 with col1:
-    task_title = st.text_input("Task title", value="Morning walk")
+    task_title = st.text_input("Task title", value="Morning walk")   # -> Task.description
 with col2:
-    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)
+    duration = st.number_input("Duration (minutes)", min_value=1, max_value=240, value=20)  # -> Task.duration
 with col3:
-    priority = st.selectbox("Priority", ["low", "medium", "high"], index=2)
+    frequency = st.selectbox("Frequency", ["daily", "weekly", "monthly"])  # -> Task.frequency
+
+if "pet" not in st.session_state:
+    st.session_state.pet = Pet(pet_id=1, name=pet_name, animal_type=species)  # Pet() from pawpal_system
 
 if st.button("Add task"):
+    new_task = Task(
+        task_id=len(st.session_state.tasks) + 1,
+        description=task_title,
+        duration=int(duration),
+        frequency=frequency,
+    )  # Task() from pawpal_system
+    st.session_state.pet.add_task(new_task)   # Pet.add_task() from pawpal_system
     st.session_state.tasks.append(
-        {"title": task_title, "duration_minutes": int(duration), "priority": priority}
+        {"description": new_task.description, "duration": new_task.duration, "frequency": new_task.frequency}
     )
 
 if st.session_state.tasks:
