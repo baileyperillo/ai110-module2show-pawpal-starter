@@ -179,10 +179,16 @@ There was also a validation concern according the the AI, where everything input
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
 - How did you decide which constraints mattered most?
 
+Some constraints that the scheduler considers is the start time, duration or how long the task takes, the date it's due, and scheduling conflicts such as if two tasks share the same start time and due date. The scheduler also has priority and frequency it repeats, and status, completed or not.
+I followed the description of the application to know some of the things I needed to add constraints. Time mattered and priority mattered the most because of how many times those things are considered when making or deciding on tasks.
+
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+A tradeoff was detecting scheduling conflicts by the exact time rather than time overlap, such as if a tasks take 1 hour and one starts 30 mins after another one. This is a reasonable tradeoff because
+
 
 ---
 
