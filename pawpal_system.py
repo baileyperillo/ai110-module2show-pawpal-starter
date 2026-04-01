@@ -122,6 +122,31 @@ class Scheduler:
             return []
         return pet.tasks
 
+    def filter_tasks(self, is_complete: Optional[bool] = None, pet_name: Optional[str] = None) -> List[Task]:
+        """Filter tasks by completion status and/or pet name.
+        
+        Args:
+            is_complete: True for completed, False for pending, None for all
+            pet_name: Filter by pet name, None for all pets
+        
+        Returns:
+            List of tasks matching the filter criteria
+        """
+        all_tasks = self.owner.get_all_tasks()
+        
+        # Filter by completion status if specified
+        if is_complete is not None:
+            all_tasks = [task for task in all_tasks if task.is_complete == is_complete]
+        
+        # Filter by pet name if specified
+        if pet_name is not None:
+            pet = next((pet for pet in self.owner.pets if pet.name == pet_name), None)
+            if pet is None:
+                return []
+            all_tasks = [task for task in all_tasks if task in pet.tasks]
+        
+        return all_tasks
+
 
 # -----------------------------------------------------------------------
 # Previous skeleton (CoPilot + Claude iteration 1) — kept for reference
