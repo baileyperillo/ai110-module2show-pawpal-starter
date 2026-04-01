@@ -42,3 +42,7 @@ pip install -r requirements.txt
 5. Add tests to verify key behaviors.
 6. Connect your logic to the Streamlit UI in `app.py`.
 7. Refine UML so it matches what you actually built.
+
+
+Summary
+Application allows owner to put their information and allows them to add multiple pets and their information, such as their name, and type of animal. The user can then create tasks and include details such as time duration, priority, and repeat frequency. The tasks can also be assigned to a specific pet. The tasks can then be put in a list and organized in different ways, such as priority, time, time it was added, etc. The owner can then declare when a task is finished. There is also a feature that can warn the owner of task scheduling conflicts.

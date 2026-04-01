@@ -187,7 +187,7 @@ I followed the description of the application to know some of the things I neede
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
 
-A tradeoff was detecting scheduling conflicts by the exact time rather than time overlap, such as if a tasks take 1 hour and one starts 30 mins after another one. This is a reasonable tradeoff because
+A tradeoff was detecting scheduling conflicts by the exact time rather than time overlap, such as if a tasks take 1 hour and one starts 30 mins after another one. This is a reasonable tradeoff because it is can be checked easily with the attributes we have compared to time overlap where you have count the more exact timing it conflicts. It's something some owners don't really think about.
 
 
 ---

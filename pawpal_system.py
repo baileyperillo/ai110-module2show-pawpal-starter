@@ -30,12 +30,32 @@ class Task:
         self.is_complete = True
 
     def mark_incomplete(self) -> None:
-        """Reset this task back to incomplete."""
-        pass
+        """Reset this task back to incomplete.
+        
+        Sets is_complete to False, reverting any completion status.
+        Useful for unfinished or incorrectly marked tasks.
+        """
+        self.is_complete = False
 
-    def edit_task(self) -> None:
-        """Edit this task's description, duration, or frequency."""
-        pass
+    def edit_task(self, description: Optional[str] = None, 
+                  duration: Optional[int] = None, 
+                  frequency: Optional[str] = None) -> None:
+        """Edit this task's description, duration, or frequency.
+        
+        Allows partial updates: pass only the fields you want to change.
+        Useful for modifying task details without recreating the entire task.
+        
+        Args:
+            description: New task description (e.g., "Walk the dog")
+            duration: New estimated duration in minutes
+            frequency: New frequency (e.g., "daily", "weekly")
+        """
+        if description is not None:
+            self.description = description
+        if duration is not None:
+            self.duration = duration
+        if frequency is not None:
+            self.frequency = frequency
 
 
 @dataclass
@@ -51,12 +71,24 @@ class Pet:
         self.tasks.append(task)
 
     def remove_task(self, task: Task) -> None:
-        """Remove a task from this pet's task list."""
-        pass
+        """Remove a task from this pet's task list.
+        
+        Removes the specified task object from the pet's task list.
+        Does nothing if the task is not in the list.
+        
+        Args:
+            task: The task object to remove
+        """
+        if task in self.tasks:
+            self.tasks.remove(task)
 
     def get_tasks(self) -> List[Task]:
-        """Return all tasks assigned to this pet."""
-        pass
+        """Return all tasks assigned to this pet.
+        
+        Returns:
+            List of Task objects assigned to this pet
+        """
+        return self.tasks
 
 
 @dataclass
@@ -68,16 +100,42 @@ class Owner:
     pets: List[Pet] = field(default_factory=list)  # all pets belonging to this owner
 
     def add_pet(self, pet: Pet) -> None:
-        """Add a pet to this owner's pet list."""
-        pass
+        """Add a pet to this owner's pet list.
+        
+        Appends the pet to the pets list if not already present.
+        Each pet can only be added once.
+        
+        Args:
+            pet: The Pet object to add
+        """
+        if pet not in self.pets:
+            self.pets.append(pet)
 
     def remove_pet(self, pet: Pet) -> None:
-        """Remove a pet from this owner's pet list."""
-        pass
+        """Remove a pet from this owner's pet list.
+        
+        Removes the specified pet and all its associated tasks.
+        Does nothing if the pet is not in the list.
+        
+        Args:
+            pet: The Pet object to remove
+        """
+        if pet in self.pets:
+            self.pets.remove(pet)
 
     def get_all_tasks(self) -> List[Task]:
-        """Return every task across all of this owner's pets."""
-        pass
+        """Return every task across all of this owner's pets.
+        
+        Flattens the hierarchical task structure: collects tasks from all pets
+        and returns them as a single list. Useful for global scheduling operations.
+        
+        Returns:
+            Combined list of all tasks from all pets
+        """
+        all_tasks = []
+        for pet in self.pets:
+            all_tasks.extend(pet.get_tasks())
+        return all_tasks
 
 
 @dataclass
@@ -86,24 +144,66 @@ class Scheduler:
     owner: Owner                         # the owner whose tasks are being scheduled
 
     def get_pending_tasks(self) -> List[Task]:
-        """Return all incomplete tasks across every pet."""
-        pass
+        """Return all incomplete tasks across every pet.
+        
+        Filters and returns tasks with is_complete == False.
+        Useful for displaying a todo list or tracking outstanding work.
+        
+        Returns:
+            List of incomplete Task objects
+        """
+        return self.filter_by_completion_status(False)
 
     def get_completed_tasks(self) -> List[Task]:
-        """Return all completed tasks across every pet."""
-        pass
+        """Return all completed tasks across every pet.
+        
+        Filters and returns tasks with is_complete == True.
+        Useful for viewing completed work and task history.
+        
+        Returns:
+            List of completed Task objects
+        """
+        return self.filter_by_completion_status(True)
 
     def sort_tasks_by_duration(self) -> List[Task]:
-        """Return all tasks sorted from shortest to longest duration."""
-        pass
+        """Return all tasks sorted from shortest to longest duration.
+        
+        Uses a lambda function to sort by duration in ascending order.
+        Useful for prioritizing quick tasks or scheduling efficiency.
+        
+        Returns:
+            List of tasks sorted by duration (shortest first)
+        """
+        all_tasks = self.owner.get_all_tasks()
+        return sorted(all_tasks, key=lambda task: task.duration)
 
     def sort_tasks_by_frequency(self) -> List[Task]:
-        """Return all tasks grouped or sorted by frequency."""
-        pass
+        """Return tasks grouped or sorted by frequency.
+        
+        Groups tasks by frequency type (daily, weekly, one-time, etc)
+        and sorts them within each group by due date.
+        Useful for understanding recurring vs. one-time workload patterns.
+        
+        Returns:
+            List of tasks grouped and sorted by frequency
+        """
+        all_tasks = self.owner.get_all_tasks()
+        # Sort by frequency first (as primary key) then by due date (as secondary key)
+        return sorted(all_tasks, key=lambda task: (task.frequency, task.due_date))
 
     def get_tasks_for_pet(self, pet: Pet) -> List[Task]:
-        """Return all tasks assigned to a specific pet."""
-        pass
+        """Return all tasks assigned to a specific pet.
+        
+        Filters global task list to return only tasks for the given pet.
+        Equivalent to calling pet.get_tasks() directly.
+        
+        Args:
+            pet: The Pet object to retrieve tasks for
+            
+        Returns:
+            List of tasks assigned to the specified pet
+        """
+        return pet.get_tasks()
 
     def _time_to_minutes(self, time_str: str) -> int:
         """Helper: Convert "HH:MM" to total minutes for sorting.
